@@ -1,0 +1,13 @@
+# Core dependencies for V38 (pure indicator-based strategy, no ML)
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Exchange API - Official Bybit library with WebSocket support
+# Provides all functionality: REST API + WebSocket + historical data
+pybit>=5.12.0
+
+# HTTP requests (for Fear & Greed Index API)
+requests>=2.31.0
+
+# Environment variables
+python-dotenv>=1.0.0

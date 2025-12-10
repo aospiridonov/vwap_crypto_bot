@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  trading-bot:
+    build: .
+    container_name: indicators_crypto_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ../../data/raw:/app/data/raw
+    environment:
+      - TZ=UTC
+      - PYTHONUNBUFFERED=1
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    # Optional: resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.9'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G

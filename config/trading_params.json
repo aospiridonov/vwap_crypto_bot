@@ -1,0 +1,24 @@
+{
+  "symbol": "BTCUSDT",
+  "timeframe": "240",
+  "leverage": 7,
+  "position_size_pct": 1.0,
+  "max_hold_hours": 64,
+
+  "sigma_entry": 2.0,
+  "sigma_exit": 0.8,
+  "sl_atr_mult": 1.8,
+  "min_tp_pct": 0.3,
+
+  "enable_adaptive_leverage": true,
+  "min_leverage": 3,
+  "consecutive_sl_threshold": 2,
+  "pause_after_sl_streak": 3,
+  "pause_hours": 24,
+  "max_dd_threshold_1": 35.0,
+  "max_dd_threshold_2": 45.0,
+  "recovery_win_streak": 5,
+  "recovery_dd_threshold": 10.0,
+
+  "min_history_days": 7
+}
