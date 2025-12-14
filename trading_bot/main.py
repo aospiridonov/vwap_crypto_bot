@@ -424,7 +424,7 @@ class TradingBotVWAP:
             signal = self.signal_generator.generate_signal(df_4h)
 
             if signal is None:
-                logger.debug("No signal generated")
+                logger.info("📊 No signal - conditions not met")
                 return
 
             # Execute order
