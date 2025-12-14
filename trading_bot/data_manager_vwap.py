@@ -260,7 +260,14 @@ class TradingDataManagerVWAP:
             True if data is valid and ready for signal generation
         """
         try:
-            candle_ts = pd.to_datetime(candle['timestamp']) if isinstance(candle['timestamp'], str) else candle['timestamp']
+            # Convert timestamp - WebSocket sends milliseconds as int
+            ts_raw = candle['timestamp']
+            if isinstance(ts_raw, int):
+                candle_ts = pd.to_datetime(ts_raw, unit='ms')
+            elif isinstance(ts_raw, str):
+                candle_ts = pd.to_datetime(ts_raw)
+            else:
+                candle_ts = ts_raw  # Already a Timestamp
 
             # Check if we have existing data
             if self.df_4h is None or len(self.df_4h) == 0:
@@ -268,7 +275,6 @@ class TradingDataManagerVWAP:
                 return self.update_historical_data(exchange_connector)
 
             last_ts = self.df_4h.index[-1]
-            expected_ts = last_ts + timedelta(hours=4)
 
             # Check for gaps
             time_diff = candle_ts - last_ts
