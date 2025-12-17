@@ -3,7 +3,7 @@ version: '3.8'
 services:
   trading-bot:
     build: .
-    container_name: indicators_crypto_bot
+    container_name: vwap_crypto_bot
     restart: unless-stopped
     env_file:
       - .env
