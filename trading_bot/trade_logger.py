@@ -101,6 +101,22 @@ class TradeLogger:
             logger.error(f"❌ Failed to get trades: {e}")
             return []
 
+    def get_all_trades(self) -> List[Dict]:
+        """
+        Get all trades (no date filter)
+
+        Returns:
+            List of all trade dicts
+        """
+        if len(self.trades) == 0:
+            return []
+
+        try:
+            return self.trades.to_dict('records')
+        except Exception as e:
+            logger.error(f"❌ Failed to get all trades: {e}")
+            return []
+
     def get_stats(self, days: int = 30) -> Dict:
         """
         Get trading statistics for last N days

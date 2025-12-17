@@ -300,9 +300,9 @@ class TradingBotVWAP:
                 else:
                     pnl_pct = 0
 
-                # Log trade
+                # Log trade (fields match TradeLogger expected format)
+                hold_hours = position.get_hold_time_hours()
                 trade_data = {
-                    'timestamp': datetime.utcnow().isoformat(),
                     'action': position.action,
                     'entry_price': position.entry_price,
                     'exit_price': exit_price,
@@ -310,9 +310,12 @@ class TradingBotVWAP:
                     'sl_price': position.sl_price,
                     'size_usdt': position.size_usdt,
                     'leverage': self.current_leverage,
-                    'exit_reason': exit_reason,
+                    'reason': exit_reason,
                     'pnl': pnl,
                     'pnl_pct': pnl_pct,
+                    'hold_hours': hold_hours,
+                    'entry_time': position.entry_time,
+                    'exit_time': datetime.utcnow(),
                     'consecutive_sl': self.consecutive_sl,
                     'consecutive_wins': self.consecutive_wins
                 }
@@ -641,9 +644,9 @@ class TradingBotVWAP:
                         if pnl_info['pnl'] > 0:
                             self.consecutive_wins += 1
 
-                    # Log trade
+                    # Log trade (fields match TradeLogger expected format)
+                    hold_hours = position.get_hold_time_hours()
                     trade_data = {
-                        'timestamp': datetime.utcnow().isoformat(),
                         'action': position.action,
                         'entry_price': position.entry_price,
                         'exit_price': current_price,
@@ -651,9 +654,12 @@ class TradingBotVWAP:
                         'sl_price': position.sl_price,
                         'size_usdt': position.size_usdt,
                         'leverage': self.current_leverage,
-                        'exit_reason': exit_reason,
+                        'reason': exit_reason,
                         'pnl': pnl_info['pnl'],
                         'pnl_pct': pnl_info['pnl_pct'],
+                        'hold_hours': hold_hours,
+                        'entry_time': position.entry_time,
+                        'exit_time': datetime.utcnow(),
                         'consecutive_sl': self.consecutive_sl,
                         'consecutive_wins': self.consecutive_wins
                     }

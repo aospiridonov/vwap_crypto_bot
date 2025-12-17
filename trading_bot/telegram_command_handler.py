@@ -156,6 +156,8 @@ class TelegramCommandHandler:
                 self._handle_position(chat_id)
             elif text == '/stats':
                 self._handle_stats(chat_id)
+            elif text == '/stats_all':
+                self._handle_stats_all(chat_id)
             elif text == '/status':
                 self._handle_status(chat_id)
             elif text == '/health':
@@ -270,6 +272,86 @@ class TelegramCommandHandler:
             logger.error(f"❌ Stats command error: {e}")
             self._send_message(chat_id, "❌ Error getting stats")
 
+    def _handle_stats_all(self, chat_id: int):
+        """Handle /stats_all command - all time statistics"""
+        try:
+            if not self.trade_logger:
+                self._send_message(chat_id, "⚠️ Trade logging not enabled")
+                return
+
+            # Get ALL trades (no date filter)
+            trades = self.trade_logger.get_all_trades()
+
+            if not trades:
+                self._send_message(chat_id, "📊 No trades recorded yet")
+                return
+
+            # Calculate stats
+            total_trades = len(trades)
+            wins = sum(1 for t in trades if t.get('pnl', 0) > 0)
+            losses = sum(1 for t in trades if t.get('pnl', 0) < 0)
+            breakeven = total_trades - wins - losses
+            win_rate = (wins / total_trades * 100) if total_trades > 0 else 0
+
+            total_pnl = sum(t.get('pnl', 0) for t in trades)
+            total_pnl_pct = sum(t.get('pnl_pct', 0) for t in trades)
+            best_trade = max((t.get('pnl', 0) for t in trades), default=0)
+            worst_trade = min((t.get('pnl', 0) for t in trades), default=0)
+
+            # Average hold time
+            hold_times = [t.get('hold_hours', 0) for t in trades if t.get('hold_hours', 0) > 0]
+            avg_hold = sum(hold_times) / len(hold_times) if hold_times else 0
+
+            # Count LONG vs SHORT
+            long_count = sum(1 for t in trades if t.get('action') == 'LONG')
+            short_count = sum(1 for t in trades if t.get('action') == 'SHORT')
+
+            # Count by exit reason
+            tp_count = sum(1 for t in trades if t.get('reason') == 'TP')
+            sl_count = sum(1 for t in trades if t.get('reason') == 'SL')
+            timeout_count = sum(1 for t in trades if t.get('reason') in ['Timeout', 'Manual', 'CLOSED'])
+
+            # Date range
+            try:
+                exit_times = [t.get('exit_time') for t in trades if t.get('exit_time')]
+                if exit_times:
+                    first_trade = min(exit_times)
+                    last_trade = max(exit_times)
+                    if isinstance(first_trade, str):
+                        first_trade = first_trade[:10]
+                        last_trade = last_trade[:10]
+                    elif hasattr(first_trade, 'strftime'):
+                        first_trade = first_trade.strftime('%Y-%m-%d')
+                        last_trade = last_trade.strftime('%Y-%m-%d')
+                    date_range = f"{first_trade} - {last_trade}"
+                else:
+                    date_range = "N/A"
+            except:
+                date_range = "N/A"
+
+            message = (
+                f"📊 *All-Time Stats*\n\n"
+                f"Period: {date_range}\n"
+                f"Total Trades: {total_trades}\n"
+                f"  └ LONG: {long_count}, SHORT: {short_count}\n\n"
+                f"*Results:*\n"
+                f"Win Rate: {win_rate:.1f}% ({wins}W / {losses}L"
+                + (f" / {breakeven}BE" if breakeven > 0 else "") + ")\n"
+                f"  └ TP: {tp_count}, SL: {sl_count}, Other: {timeout_count}\n\n"
+                f"*PnL:*\n"
+                f"Total: ${total_pnl:+.2f} ({total_pnl_pct:+.1f}%)\n"
+                f"Best: ${best_trade:+.2f}\n"
+                f"Worst: ${worst_trade:+.2f}\n\n"
+                f"Avg Hold: {avg_hold:.1f}h"
+            )
+
+            self._send_message(chat_id, message)
+            logger.info("✅ Sent stats_all info")
+
+        except Exception as e:
+            logger.error(f"❌ Stats_all command error: {e}")
+            self._send_message(chat_id, "❌ Error getting all-time stats")
+
     def _handle_help(self, chat_id: int):
         """Handle /help command"""
         message = (
@@ -280,6 +362,7 @@ class TelegramCommandHandler:
             "/close - Manually close current position\n\n"
             "*Statistics:*\n"
             "/stats - Trading statistics (last 30 days)\n"
+            "/stats_all - All time statistics\n"
             "/status - Bot status and last signal\n"
             "/health - Data health check\n\n"
             "*Other:*\n"
