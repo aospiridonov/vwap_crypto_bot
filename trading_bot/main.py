@@ -744,7 +744,7 @@ class TradingBotVWAP:
                     if not self.position_tracker.has_position():
                         self._prefetch_balance()
 
-                time.sleep(1)
+                time.sleep(60)
 
         except KeyboardInterrupt:
             logger.info("\n⚠️ Shutdown requested by user")
